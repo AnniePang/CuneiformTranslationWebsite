@@ -85,18 +85,41 @@ export default function LandingPage() {
   const cuneiformSamples = Object.keys(translationMap).filter(key => /[\u{12000}-\u{123FF}]/u.test(key))
   const englishSamples = Object.keys(translationMap).filter(key => !/[\u{12000}-\u{123FF}]/u.test(key))
 
-  const handleTranslate = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      if (translationMap[inputText]) {
-        setOutputText(translationMap[inputText])
-      } else {
-        setOutputText(inputText)
+  const handleTranslate = async () => {
+    setIsLoading(true);
+    setSnackbarMessage('');
+    
+    try {
+      const response = await fetch('http://127.0.0.1:8000/project/bulk-predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'  // Add this
+        },
+        body: JSON.stringify({ text: inputText })
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Translation failed with status: ${response.status}`);
       }
-      setIsLoading(false)
-      setSnackbarMessage('Translation complete!')
-      setSnackbarOpen(true)
-    }, 1000)
+  
+      const data = await response.json();
+      
+      // Make sure to set the output text based on your API's response structure
+      if (data && data.predictions) {
+        setOutputText(data.predictions);
+        setSnackbarMessage('Translation complete!');
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      setOutputText('');
+      setSnackbarMessage('Translation failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setSnackbarOpen(true);
+    }
   }
 
   const handleSampleClick = (sample: string) => {
