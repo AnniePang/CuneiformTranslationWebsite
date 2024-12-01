@@ -266,7 +266,7 @@ export default function LandingPage() {
               <Grid container spacing={4} alignItems="center">
                 <Grid item xs={12} md={6}>
                   <img
-                    src="/Mesopotamia.webp"
+                    src="Mesopotamia.webp"
                     alt="Cuneiform writing example"
                     style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                   />
