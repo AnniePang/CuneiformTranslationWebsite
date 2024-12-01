@@ -249,7 +249,7 @@ export default function LandingPage() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <img
-                  src="/Cuneiform tablet.jpg"
+                  src="/Cuneiform_tablet.jpg"
                   alt="Cuneiform Tablet"
                   style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                 />
@@ -625,7 +625,7 @@ export default function LandingPage() {
               </Grid>
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                 <img
-                  src="/Updated System Design.png"
+                  src="/Updated_System_Design.png"
                   alt="System Design Diagram"
                   style={{ maxWidth: '100%', height: 'auto' }}
                 />
