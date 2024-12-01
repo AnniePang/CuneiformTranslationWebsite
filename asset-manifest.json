@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/CuneiformTranslationWebsite/static/css/main.e6c13ad2.css",
-    "main.js": "/CuneiformTranslationWebsite/static/js/main.90b27e4f.js",
+    "main.js": "/CuneiformTranslationWebsite/static/js/main.fdbb5996.js",
     "static/js/453.ed3810f9.chunk.js": "/CuneiformTranslationWebsite/static/js/453.ed3810f9.chunk.js",
     "index.html": "/CuneiformTranslationWebsite/index.html",
     "main.e6c13ad2.css.map": "/CuneiformTranslationWebsite/static/css/main.e6c13ad2.css.map",
-    "main.90b27e4f.js.map": "/CuneiformTranslationWebsite/static/js/main.90b27e4f.js.map",
+    "main.fdbb5996.js.map": "/CuneiformTranslationWebsite/static/js/main.fdbb5996.js.map",
     "453.ed3810f9.chunk.js.map": "/CuneiformTranslationWebsite/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.90b27e4f.js"
+    "static/js/main.fdbb5996.js"
   ]
 }
