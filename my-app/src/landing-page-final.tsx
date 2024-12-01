@@ -28,22 +28,9 @@ import {
   IconButton,
   Tooltip,
   Fade,
+  Modal,
 } from '@mui/material'
-import {
-  Scroll,
-  BookOpen,
-  Globe,
-  Users,
-  ArrowRightLeft,
-  Database,
-  Code,
-  Zap,
-  AlertTriangle,
-  FileText,
-  ChevronDown,
-  X,
-  Info,
-} from 'lucide-react'
+import { Scroll, BookOpen, Globe, Users, ArrowRightLeft, Database, Code, Zap, AlertTriangle, FileText, ChevronDown, X, Info, ZoomIn } from 'lucide-react'
 
 const theme = createTheme({
   typography: {
@@ -67,10 +54,9 @@ const translationMap: TranslationMap = {
   "𒈗𒁺𒌑": "The king has arrived",
   "𒀭𒊹𒆠": "The god Nabu",
   "𒂗𒉆𒈨𒌍𒉌": "Lord of all lands",
-  "The king of Babylon": "𒈗𒆠𒂗𒁺",
-  "May the gods protect you": "𒀭𒈨𒌍𒅖𒆠𒋫",
-  "The great temple": "𒂍𒃲",
-  "In the name of Marduk": "𒅖𒈬𒀭𒀫𒌓",
+  "𒀭𒈨𒌍𒅖𒆠𒋫": "May the gods protect you",
+  "𒂍𒃲": "The great temple",
+  "𒅖𒈬𒀭𒀫𒌓": "In the name of Marduk"
 }
 
 export default function LandingPage() {
@@ -81,46 +67,104 @@ export default function LandingPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [activeSection, setActiveSection] = useState('')
+  const [openModal, setOpenModal] = useState(false);
 
-  const cuneiformSamples = Object.keys(translationMap).filter(key => /[\u{12000}-\u{123FF}]/u.test(key))
-  const englishSamples = Object.keys(translationMap).filter(key => !/[\u{12000}-\u{123FF}]/u.test(key))
-
-  const handleTranslate = async () => {
-    setIsLoading(true);
-    setSnackbarMessage('');
-    
-    try {
-      const response = await fetch('http://127.0.0.1:8000/project/bulk-predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'  // Add this
-        },
-        body: JSON.stringify({ text: inputText })
-      });
+  const cuneiformSamples = Object.keys(translationMap)
+  /*
+    const handleTranslate = async () => {
+      setIsLoading(true);
+      setSnackbarMessage('');
   
-      if (!response.ok) {
-        throw new Error(`Translation failed with status: ${response.status}`);
-      }
   
-      const data = await response.json();
-      
-      // Make sure to set the output text based on your API's response structure
-      if (data && data.predictions) {
-        setOutputText(data.predictions);
-        setSnackbarMessage('Translation complete!');
-      } else {
-        throw new Error('Invalid response format');
+  
+      try {
+        // do the sample snippet here 
+  
+  
+        const response = await fetch('http://127.0.0.1:8000/project/bulk-predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'  // Add this
+          },
+          body: JSON.stringify({ text: inputText })
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Translation failed with status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+  
+        // Make sure to set the output text based on your API's response structure
+        if (data && data.predictions) {
+          setOutputText(data.predictions);
+          setSnackbarMessage('Translation complete!');
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        setOutputText('');
+        setSnackbarMessage('Translation failed. Please try again.');
+      } finally {
+        setIsLoading(false);
+        setSnackbarOpen(true);
       }
-    } catch (error) {
-      console.error('Translation error:', error);
-      setOutputText('');
-      setSnackbarMessage('Translation failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-      setSnackbarOpen(true);
     }
+    */
+
+
+  const handleTranslate = () => {
+    setIsLoading(true)
+    setTimeout(async () => {
+      if (translationMap[inputText]) {
+        setOutputText(translationMap[inputText])
+      } else {
+        try {
+          // do the sample snippet here 
+
+
+          const response = await fetch('http://127.0.0.1:8000/project/bulk-predict', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'  // Add this
+            },
+            body: JSON.stringify({ text: inputText })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Translation failed with status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Make sure to set the output text based on your API's response structure
+          if (data && data.predictions) {
+            setOutputText(data.predictions);
+            setSnackbarMessage('Translation complete!');
+          } else {
+            throw new Error('Invalid response format');
+          }
+        } catch (error) {
+          console.error('Translation error:', error);
+          setOutputText('');
+          setSnackbarMessage('Translation failed. Please try again.');
+        } finally {
+          setIsLoading(false);
+          setSnackbarOpen(true);
+        }
+      }
+      setIsLoading(false)
+      setSnackbarMessage('Translation complete!')
+      setSnackbarOpen(true)
+    }, 1000)
   }
+
+
+
+
 
   const handleSampleClick = (sample: string) => {
     setInputText(sample)
@@ -140,6 +184,9 @@ export default function LandingPage() {
       setActiveSection(currentSection)
     }
   }
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll)
@@ -166,7 +213,7 @@ export default function LandingPage() {
             ))}
           </Toolbar>
         </AppBar>
-        <Toolbar /> {/* Add this to offset the fixed AppBar */}
+        <Toolbar />
 
         <main>
           {/* Hero Section */}
@@ -179,7 +226,7 @@ export default function LandingPage() {
                 Join us in translating over half a million cuneiform tablets and revolutionize Middle Eastern studies.
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Button variant="contained" color="secondary" size="large" href="#about">
+                <Button variant="contained" color="secondary" size="large" href="https://github.com/Dbosty/CuneiformTranslator/tree/main" target="_blank" rel="noopener noreferrer">
                   Learn More
                 </Button>
               </Box>
@@ -194,10 +241,10 @@ export default function LandingPage() {
             <Grid container spacing={4} alignItems="center">
               <Grid item xs={12} md={6}>
                 <Typography variant="body1" paragraph>
-                  The Cuneiform Translation Project aims to address the significant gap in translating cuneiform tablets from ancient Mesopotamian civilizations. With over half a million untranslated tablets in museums worldwide, we're working to unlock vital information about the early development of Western civilizations.
+                  The Cuneiform Translation Project aims to address the significant gap in translating cuneiform tablets from ancient Mesopotamian civilizations. With over half a million untranslated tablets in museums worldwide, we're working to unlock vital information about the development of early Western civilizations.
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  By leveraging technology and collaboration, we hope to overcome the current bottleneck in Middle Eastern studies and make these important artifacts accessible to the broader academic community.
+                  By leveraging neural machine translation technology and collaborating with domain experts, we hope to overcome the current bottleneck in Middle Eastern studies and make these important artifacts accessible to the broader academic community.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -226,10 +273,72 @@ export default function LandingPage() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="body1" paragraph>
-                    Cuneiform is one of the earliest forms of writing, developed over 5,000 years ago in ancient Mesopotamia (modern-day Iraq). It involved pressing a reed stylus into clay tablets to create wedge-shaped marks, which were used to record things like trade, laws, and stories. These tablets offer a glimpse into the daily lives and cultures of ancient civilizations.
+                    Cuneiform is one of the earliest forms of writing, developed over 3,000 years ago in Ancient Mesopotamia (modern-day Iraq). It was the most widespread and historically significant writing system in the ancient Middle East, used across many languages and dialects for several millennia.
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Evolving from pictographs into standardized characters, cuneiform logograms were created by pressing a reed stylus into clay tablets to create wedge-shaped marks. Each logogram yields a single phonetic value, but extensive homophony and polyphony in the language means that the exact sound and sense of a sign varies depending on context.
                   </Typography>
                 </Grid>
               </Grid>
+              <Box sx={{ mt: 4 }}>
+                <Typography variant="h4" align="center" gutterBottom>
+                  Cuneiform Through Time
+                </Typography>
+                <Grid container spacing={4} alignItems="center">
+                  <Grid item xs={12} md={8}>
+                    <Typography variant="body1" paragraph>
+                      This project focuses on translating tablets written in Akkadian and Sumerian, which are two closely-related dialects using the cuneiform writing system. Though cuneiform eventually disappeared as a writing system, its history spans the last three centuries BCE, and its historical significance in understanding ancient Mesopotamian society continues to resonate today.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      Cuneiform writing was used to record a wide variety of information, including legal codes, literary works, mathematical calculations, and astronomical observations. The diversity of content found in cuneiform texts provides invaluable insights into the daily lives, beliefs, and knowledge of ancient Mesopotamian civilizations.
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '200px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        borderRadius: '8px',
+                        '&:hover': {
+                          '& .zoom-icon': {
+                            opacity: 1,
+                          },
+                        },
+                      }}
+                      onClick={handleOpenModal}
+                    >
+                      <img
+                        src="what is cuneiform pic 2.webp"
+                        alt="Cuneiform evolution"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                      <Box
+                        className="zoom-icon"
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          borderRadius: '50%',
+                          padding: '10px',
+                          opacity: 0,
+                          transition: 'opacity 0.3s',
+                        }}
+                      >
+                        <ZoomIn color="white" size={24} />
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
             </Container>
           </Box>
 
@@ -267,6 +376,7 @@ export default function LandingPage() {
               </Grid>
             </Grid>
           </Container>
+
 
           {/* Challenge Section */}
           <Box sx={{ bgcolor: 'background.paper', py: 8 }} id="challenge">
@@ -333,34 +443,22 @@ export default function LandingPage() {
               <Typography variant="h3" align="center" gutterBottom>
                 Our Datasets
               </Typography>
-              <Grid container spacing={4}>
+              <Grid container spacing={4} justifyContent="center">
                 {[
                   {
                     title: "ORACC",
                     description: 'Open Richly Annotated Cuneiform Corpus',
-                    content: 'Primary source of annotated and reliable training data.',
+                    content: 'ORACC comprises the largest open-source repository of expert academic translations for cuneiform texts, providing line-by-line translations between the transliterated cuneiform texts (a phonetic, latin alphabet representation of the tablet) and english. ',
                     link: "https://oracc.museum.upenn.edu/"
-                  },
-                  {
-                    title: "CDLI",
-                    description: 'Cuneiform Digital Library Initiative',
-                    content: 'Extensive corpus of manually translated cuneiform texts.',
-                    link: "https://cdli.mpiwg-berlin.mpg.de/artifacts/359543"
                   },
                   {
                     title: "FactGrid Database",
                     description: 'Wikibase platform using SPARQL queries',
-                    content: 'Augments training data with structured historical knowledge.',
+                    content: 'The FactGrid Wikibase has the largest database of Sumerian and Akkadian lexemes mapped to all their English senses (meanings). ',
                     link: "https://situx.github.io/paleordia/language/?q=Q36790&qLabel=Sumerian"
                   },
-                  {
-                    title: "AICC",
-                    description: 'AI Cuneiform Corpus',
-                    content: 'Used for selecting hallucination-free translations and benchmarking performance with BLEURT.',
-                    link: "https://aicuneiform.com/search?q=P359543"
-                  },
                 ].map((dataset, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Grid item xs={12} sm={6} md={6} key={index}>
                     <Card sx={{ bgcolor: 'background.default', height: '100%', display: 'flex', flexDirection: 'column' }}>
                       <CardHeader
                         avatar={<FileText />}
@@ -368,7 +466,6 @@ export default function LandingPage() {
                           <Tooltip title="Click to visit website" arrow>
                             <a href={dataset.link} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
                               {dataset.title}
-
                             </a>
                           </Tooltip>
                         }
@@ -381,6 +478,14 @@ export default function LandingPage() {
                   </Grid>
                 ))}
               </Grid>
+              <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="h5" gutterBottom>
+                  Why these two?
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Because of the extremely low-resource nature of the cuneiform translation project, it is important to find high-quality sources to augment the training data. The tokenizers and models can be trained on a much larger vocabulary by exploding lexemes to their multiple senses, improving translation performance.
+                </Typography>
+              </Box>
             </Container>
           </Box>
 
@@ -393,21 +498,9 @@ export default function LandingPage() {
               <CardHeader title="Cuneiform Translator" subheader="Experience the potential of our translation technology" />
               <CardContent>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Translation Direction</InputLabel>
-                    <Select
-                      value={translationDirection}
-                      onChange={(e) => setTranslationDirection(e.target.value as string)}
-                      label="Translation Direction"
-                    >
-                      <MenuItem value="cuneiform-to-english">Cuneiform to English</MenuItem>
-                      <MenuItem value="english-to-cuneiform">English to Cuneiform</MenuItem>
-                    </Select>
-                  </FormControl>
-
                   <Typography variant="subtitle1">Sample snippets:</Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                    {(translationDirection === 'cuneiform-to-english' ? cuneiformSamples : englishSamples).map((sample, index) => (
+                    {cuneiformSamples.map((sample, index) => (
                       <Chip
                         key={index}
                         label={sample}
@@ -420,7 +513,7 @@ export default function LandingPage() {
                   </Box>
 
                   <TextField
-                    label="Enter text to translate"
+                    label="Enter Cuneiform text to translate"
                     multiline
                     rows={4}
                     value={inputText}
@@ -459,53 +552,83 @@ export default function LandingPage() {
               </Typography>
               <Grid container spacing={4}>
                 {[
-                  { title: 'Data Engineering', icon: <Database />, content: ['Implement pipeline for efficient text tokenization', 'Experiment with different tokenizers for cuneiform language', 'Explore sentence-level and word-level tokenizations', 'Use professional translations as desired outputs'] },
-                  { title: 'Modeling', icon: <Code />, content: ['Utilize t5 model from HuggingFace', 'Apply transfer learning and fine-tuning techniques', 'Explore Facebook\'s NLLB model for low-resource languages', 'Create and evaluate different output embeddings'] },
-                  { title: 'Evaluation', icon: <Zap />, content: ['Match model translations with researcher translations', 'Utilize ROUGE and BLEU scores for evaluation', 'Implement BLEURT for benchmarking performance'] },
-                  { title: 'Efficiency', icon: <AlertTriangle />, content: ['Leverage cloud computing resources (AWS)', 'Implement DevOps for training and evaluation processes', 'Use Weights & Biases (wandb) for model weights storage', 'Utilize SageMaker for efficient inference and translations'] },
-                ].map((approach, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <Accordion>
-                      <AccordionSummary
-                        expandIcon={<ChevronDown />}
-                        aria-controls={`panel${index}a-content`}
-                        id={`panel${index}a-header`}
-                      >
-                        <Typography sx={{ display: 'flex', alignItems: 'center' }}>
-                          {React.cloneElement(approach.icon, { style: { marginRight: '8px' } })}
-                          {approach.title}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
+                  {
+                    title: 'Data Extraction and Cleaning',
+                    icon: <Database />,
+                    content: (
+                      <>
+
                         <List>
-                          {approach.content.map((item, i) => (
-                            <ListItem key={i}>
-                              <ListItemText primary={item} />
-                            </ListItem>
-                          ))}
+                          <ListItem>
+                            <ListItemText primary="The transliterated form of the cuneiform data and English document pairs were extracted using web scraping from ORACC, and via SPARQL query from Wikibase." />
+                          </ListItem>
+                          <ListItem>
+                            <ListItemText primary="The transliterated data was then cleaned of annotations and converted to cuneiform using standardized style guides and signlists, and split into training, validation, and testing sets." />
+                          </ListItem>
+                          <ListItem>
+                            <ListItemText primary="Akkadian and Sumerian lexemes are only included in the training set, as accurate translations for individual characters was not a priority for model evaluation." />
+                          </ListItem>
                         </List>
-                      </AccordionDetails>
-                    </Accordion>
+                      </>
+                    )
+                  },
+                  {
+                    title: 'Tokenization and Modeling',
+                    icon: <Code />,
+                    content: (
+                      <>
+
+                        <List>
+                          <ListItem>
+                            <ListItemText primary="The main tokenizer used was a PyTorch BPE (byte-pair encoding) tokenizer, a subword tokenizer shown to be effective in low-resource language settings." />
+                          </ListItem>
+                          <ListItem>
+                            <ListItemText primary="This tokenizer was then paired with several models: T5, mT5 (multilingual T5), Helsinki NLP's opus-mt-ar-en (an arabic to english model) and Meta's NLLB (No Language Left Behind) model." />
+                          </ListItem>
+                          <ListItem>
+                            <ListItemText primary="Two custom models were implemented using tensorflow, including a Encoder-Decoder RNN with Attention, and a transformer model." />
+                          </ListItem>
+                          <ListItem>
+                            <ListItemText primary="No model achieved a BLEU score higher than 8%, indicating fundamental limitations to training accuracy given the dataset." />
+                          </ListItem>
+                        </List>
+                      </>
+                    )
+                  },
+                  {
+                    title: 'Infrastructure',
+                    icon: <Zap />,
+                    content: (
+                      <List>
+                        <ListItem>
+                          <ListItemText primary="The models were trained on a virtual machine using AWS, then published to HuggingFace." />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText primary="We implemented a FastAPI application with endpoints that seamlessly integrate models from Hugging Face and delivers model translations via our front-end UI, which was created using React." />
+                        </ListItem>
+                      </List>
+                    )
+                  },
+                ].map((approach, index) => (
+                  <Grid item xs={12} md={4} key={index}>
+                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                      <CardHeader
+                        avatar={approach.icon}
+                        title={approach.title}
+                      />
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        {approach.content}
+                      </CardContent>
+                    </Card>
                   </Grid>
                 ))}
               </Grid>
-
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h4" align="center" gutterBottom>
-                  System Design
-                </Typography>
-                <Typography variant="body1" align="center">
-                  Our system leverages various data sources, processes them through Text Fabric,
-                  fine-tunes a Hugging Face t5 model, and deploys via API to a front-end interactive UI.
-                  All training and evaluation is powered by AWS.
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <img
-                    src="/System design diagram.png"
-                    alt="System Design Diagram"
-                    style={{ maxWidth: '100%', height: 'auto' }}
-                  />
-                </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <img
+                  src="/Updated System Design.png"
+                  alt="System Design Diagram"
+                  style={{ maxWidth: '100%', height: 'auto' }}
+                />
               </Box>
             </Container>
           </Box>
@@ -526,8 +649,11 @@ export default function LandingPage() {
                   size="large"
                   startIcon={<Users />}
                   onClick={() => {
-                    setSnackbarMessage('Thank you for your interest! We\'ll be in touch soon.')
-                    setSnackbarOpen(true)
+                    const recipients = 'anniepang@berkeley.edu, omccauley@ischool.berkeley.edu, danielbostwick@ischool.berkeley.edu, gilberto@ischool.berkeley.edu, thossain@ischool.berkeley.edu';
+                    const subject = 'Join the Cuneiform Translation Project';
+                    const body = 'I am interested in joining the team. Here are my details:\n\nName:\nExpertise:\nMessage:';
+                    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipients)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    window.open(gmailUrl, '_blank');
                   }}
                 >
                   Join the Team
@@ -540,7 +666,7 @@ export default function LandingPage() {
         <Box component="footer" sx={{ bgcolor: 'background.paper', py: 6, borderTop: 1, borderColor: 'primary.main' }}>
           <Container>
             <Typography variant="body2" align="center">
-              © 2023 Cuneiform Translation Project. All rights reserved.
+              © 2024 Cuneiform Translation Project. All rights reserved.
             </Typography>
           </Container>
         </Box>
@@ -565,7 +691,38 @@ export default function LandingPage() {
             </IconButton>
           }
         />
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            overflow: 'auto',
+          }}>
+            <img
+              src="what is cuneiform pic 2.webp"
+              alt="Cuneiform evolution"
+              style={{
+                width: '100%',
+                height: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </Box>
+        </Modal>
       </Box>
     </ThemeProvider>
   )
 }
+
